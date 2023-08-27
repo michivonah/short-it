@@ -4,13 +4,18 @@ import re
 
 app = Flask(__name__)
 
+defaultpage = "https://example.com"
+
+@app.route("/")
+def home():
+    return redirect(defaultpage, code=302)
+
 @app.route("/create/<slug>")
 def createNew(slug):
     return f"New request registerd for /{slug}"
 
 @app.route("/<slug>")
 def shortUrl(slug):
-    defaultpage = "https://example.com"
     if re.search("^[0-9a-zA-Z]*$", slug):
         destination = db.executeQuery(f'SELECT "destination" FROM "url" WHERE "slug" = \'{str.lower(slug)}\';')
         if destination:
