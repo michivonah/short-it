@@ -12,7 +12,21 @@ def home():
 
 @app.route("/create/<slug>")
 def createNew(slug):
-    return f"New request registerd for /{slug}"
+    token = request.args.get("token")
+    dest = request.args.get("to")
+    if token:
+        if dest:
+            db.executeWithoutFetch(f'INSERT INTO "url" ("slug", "destination") VALUES (\'{slug}\', \'{dest}\');')
+            report = {
+                "message":"Short url created",
+                "slug":slug,
+                "destination":dest
+            }
+            return jsonify(report), 200
+        else:
+            return createError("No destination, please provide a destination url")
+    else:
+        return createError("Not allowed - please provide a authentication token")
 
 @app.route("/<slug>")
 def shortUrl(slug):
@@ -25,6 +39,12 @@ def shortUrl(slug):
         return redirect(destination, code=302)
     else:
         return render_template("error.html")
+    
+def createError(message):
+    error = jsonify({
+            "message":message
+        })
+    return error, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
