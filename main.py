@@ -15,7 +15,10 @@ def createNew(slug):
     token = request.args.get("token")
     dest = request.args.get("to")
     if token:
+        # ADD: validate token - don't allow any string
         if dest:
+            # ADD: Check if url already exits
+            # ADD: Validate url - don't allow any sort of text
             db.executeWithoutFetch(f'INSERT INTO "url" ("slug", "destination") VALUES (\'{slug}\', \'{dest}\');')
             report = {
                 "message":"Short url created",
