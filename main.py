@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, redirect, render_template
 import dbfunctions as db
 import re
+import random
+import string
 
 app = Flask(__name__)
 
@@ -24,11 +26,11 @@ def createNew():
                         if checkString(slug):
                             slugExists = db.executeQuery(f'SELECT "slug" FROM "url" WHERE "slug" = \'{str.lower(slug)}\';')
                             if slugExists:
-                                slug = generateSlug()
+                                slug = generateSlug(6)
                         else:
-                            slug = generateSlug()
+                            slug = generateSlug(6)
                     else:
-                        slug = generateSlug()
+                        slug = generateSlug(6)
                     return createUrl(slug, dest)
                 else:
                     return createError("No destination, please provide a destination url")
@@ -71,9 +73,10 @@ def checkString(string):
     valid = re.search(pattern, string)
     return valid
 
-def generateSlug():
-    # ADD: Generate a random 6-digit slug
-    return "12"
+def generateSlug(lenght):
+    symbolList = "abcdefghijklmnopqrstuvwxyz0123456789"
+    newSlug = ''.join(random.choice(symbolList) for i in range(lenght))
+    return newSlug
 
 if __name__ == "__main__":
     app.run(debug=True)
