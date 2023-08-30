@@ -22,14 +22,7 @@ def createNew():
             getToken = db.executeQuery(f'SELECT "name" FROM "user" WHERE "token" = \'{token}\';')
             if getToken: # Provided token exists and is valid
                 if dest:
-                    if slug:
-                        if checkString(slug):
-                            slugExists = db.executeQuery(f'SELECT "slug" FROM "url" WHERE "slug" = \'{str.lower(slug)}\';')
-                            if slugExists:
-                                slug = generateSlug(6)
-                        else:
-                            slug = generateSlug(6)
-                    else:
+                    if not slug:
                         slug = generateSlug(6)
                     return createUrl(slug, dest)
                 else:
@@ -60,7 +53,11 @@ def createError(message):
     return error, 200
 
 def createUrl(slug, dest):
-    db.executeWithoutFetch(f'INSERT INTO "url" ("slug", "destination") VALUES (\'{slug}\', \'{dest}\');')
+    if not checkString(slug): # Reset string
+        slug = generateSlug(6)
+    while db.executeQuery(f'SELECT "slug" FROM "url" WHERE "slug" = \'{str.lower(slug)}\';'): # Generates a string until its not in use
+        slug = generateSlug(6)
+    db.executeWithoutFetch(f'INSERT INTO "url" ("slug", "destination") VALUES (\'{slug}\', \'{dest}\');') # Adds the string to db
     report = {
         "message":"Short url created",
         "slug":slug,
