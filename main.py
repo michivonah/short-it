@@ -18,13 +18,10 @@ def createNew():
     slug = request.args.get("slug", default=generateSlug(6))
     if checkString(token): # Check if token matches RegEx
         validateToken = db.executeQuery(f'SELECT "name" FROM "user" WHERE "token" = \'{token}\';')
-        if validateToken: # Provided token exists and is valid
-            if dest:
-                return createUrl(slug, dest)
-            else:
-                return createError("No destination got, please provide a destination url")
+        if validateToken and checkString(dest, "url"): # Provided token & destination is valid
+            return createUrl(slug, dest)
         else:
-            return createError("Not allowed - please provide a valid authentication token")
+            return createError("Creation failed - please provide a valid authentication token and a destination url")
     else:
         return createError("Not allowed - please provide a valid authentication token")
 
@@ -58,8 +55,12 @@ def createUrl(slug, dest):
     }
     return jsonify(report), 200
 
-def checkString(string="sometext"):
-    pattern = "^[0-9a-zA-Z]*$"
+def checkString(string="sometext", type="alphanumeric"):
+    match type:
+        case "url":
+            pattern = "^(https?:\/\/)?[0-9a-zA-Z:\/+\- %?=&.]+$"
+        case "alphanumeric" | _:
+            pattern = "^[0-9a-zA-Z]*$"
     valid = re.search(pattern, string)
     return valid
 
